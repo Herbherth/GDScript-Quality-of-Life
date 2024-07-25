@@ -1,0 +1,96 @@
+[gd_scene load_steps=4 format=3 uid="uid://dlnf1rsvok04a"]
+
+[ext_resource type="Script" path="res://addons/ScriptEditorQoL/create_method_popup.gd" id="1_d5t28"]
+
+[sub_resource type="InputEventKey" id="InputEventKey_1w1np"]
+device = -1
+keycode = 4194305
+
+[sub_resource type="Shortcut" id="Shortcut_7ei5i"]
+events = [SubResource("InputEventKey_1w1np")]
+
+[node name="CreateMethodPopup" type="PopupPanel"]
+initial_position = 5
+size = Vector2i(886, 200)
+visible = true
+script = ExtResource("1_d5t28")
+
+[node name="Vertical_align" type="VBoxContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 25
+alignment = 1
+
+[node name="CreateMethodTitle" type="Label" parent="Vertical_align"]
+layout_mode = 2
+text = "Create new method:"
+horizontal_alignment = 1
+
+[node name="func_name" type="HBoxContainer" parent="Vertical_align"]
+layout_mode = 2
+alignment = 1
+
+[node name="func" type="Label" parent="Vertical_align/func_name"]
+layout_mode = 2
+text = "func "
+
+[node name="method_name" type="LineEdit" parent="Vertical_align/func_name"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+placeholder_text = "method_name"
+alignment = 1
+
+[node name="open" type="Label" parent="Vertical_align/func_name"]
+layout_mode = 2
+text = "("
+
+[node name="param" type="LineEdit" parent="Vertical_align/func_name"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+placeholder_text = "parameters_optional"
+alignment = 1
+
+[node name="close" type="Label" parent="Vertical_align/func_name"]
+layout_mode = 2
+text = ") -> "
+
+[node name="return_type" type="LineEdit" parent="Vertical_align/func_name"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+placeholder_text = "void"
+alignment = 1
+
+[node name="end" type="Label" parent="Vertical_align/func_name"]
+layout_mode = 2
+text = ":"
+
+[node name="Buttons" type="HBoxContainer" parent="Vertical_align"]
+layout_mode = 2
+theme_override_constants/separation = 50
+alignment = 1
+
+[node name="Create" type="Button" parent="Vertical_align/Buttons"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Create"
+
+[node name="Cancel" type="Button" parent="Vertical_align/Buttons"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+shortcut = SubResource("Shortcut_7ei5i")
+text = "Cancel"
+
+[connection signal="text_submitted" from="Vertical_align/func_name/method_name" to="." method="_on_text_submitted"]
+[connection signal="text_submitted" from="Vertical_align/func_name/param" to="." method="_on_text_submitted"]
+[connection signal="text_submitted" from="Vertical_align/func_name/return_type" to="." method="_on_text_submitted"]
+[connection signal="pressed" from="Vertical_align/Buttons/Create" to="." method="_on_create_pressed"]
+[connection signal="pressed" from="Vertical_align/Buttons/Cancel" to="." method="_on_cancel_pressed"]
