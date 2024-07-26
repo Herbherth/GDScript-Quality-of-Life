@@ -21,6 +21,7 @@ extends EditorPlugin
 ## - Auto correct indentation from pasted blocks to match the line above[br]
 ## - Auto replace set keywords to any line set by you at [code]Editor -> Editor Settings -> GDScript QoL -> Change To[/code][br]
 ## - Auto remove one indentation after [code]return[/code], [code]break[/code] and [code]continue[/code][br]
+## - On delete line, auto remove remaining indentation from middle of the line
 ## - Auto add [code]:[/code] at the end of [code]if[/code] statements if they are not closed[br]
 ## - Auto find [code]if[/code] above to match indentation when write [code]else[/code] or [code]elif[/code][br]
 ## - Auto complete [code]match[/code] with enum list if any[br]
@@ -107,20 +108,22 @@ var create_method_shortcut: InputEventKey
 ## [br]Default value: [kbd]ctrl + U[/kbd][br]
 var update_line_shortcut: InputEventKey
 
-## [br]Change the [member settings] at [code]Editor -> Editor Settings -> GDScript QoL[/code]
-## [br][br][param function variable name]: The name of the variable that will be auto created when creating a method with return type.
+## Change the [member settings] at [code]Editor -> Editor Settings -> GDScript QoL[/code]
+## [br][br][param Function Variable Name]: The name of the variable that will be auto created when creating a method with return type.
 ## [br]Default value: [code]private_var[/code]
-## [br][br][param call deferred keyword]: The keyword used at the end of a line to change the called method to call_deferred.
+## [br][br][param Call Deferred Keyword]: The keyword used at the end of a line to change the called method to call_deferred.
 ## [br]Default value: [code]cd[/code]
-## [br][br][param set deferred keyword]: The keyword used at the end of a line to change the set variable to set_deferred.
+## [br][br][param Set Deferred Keyword]: The keyword used at the end of a line to change the set variable to set_deferred.
 ## [br]Default value: [code]sd[/code]
-## [br][br][param auto dedent after return]: If it should auto dedent (remove one tab) after the keywords from [constant DEDENT_KEYWORDS].
+## [br][br][param Auto Dedent After Return]: If it should auto dedent (remove one tab) after the keywords from [constant DEDENT_KEYWORDS].
 ## [br]Default value: [code]true[/code]
-## [br][br][param create method shortcut]: The shortcut to create method from selection. The method created will be placed at the end of the code.
+## [br][br][param Auto Remove Indent on Delete Line]: If it should remove the indentation from middle of line when a delete action joins two lines.
+## [br]Default value: [code]true[/code]
+## [br][br][param Create Method Shortcut]: The shortcut to create method from selection. The method created will be placed at the end of the code.
 ## [br]Default value: [kbd]ctrl + M[/kbd]
-## [br][br][param update line shortcut]: The shortcut to update the current line without pressing ENTER.
+## [br][br][param Update Line Shortcut]: The shortcut to update the current line without pressing ENTER.
 ## [br]Default value: [kbd]ctrl + U[/kbd]
-## [br][br][param change to]: A dictionary of [b]STRING[/b] keys that when they are found as a line text, will auto change to respective values as String.
+## [br][br][param Change To]: A dictionary of [b]STRING[/b] keys that when they are found as a line text, will auto change to respective values as String.
 ## [br]Default value: [code] "await f": "await get_tree().process_frame"[/code]
 ## [br]For now, it only accepts single line changes. To use multiline changes,
 ## I recommend give a look at [url=https://github.com/rainlizard/GDScriptMacros]GDScriptMacros[/url]  -  Not mine, btw[br]
