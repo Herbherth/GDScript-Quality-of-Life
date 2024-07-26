@@ -2,7 +2,7 @@
 # GDScript-Quality-of-Life
 Bring some quality of life features for GDScript inside godot code editor.
 
-This plugin should work for Godot 4 and higher.
+This plugin should work for Godot 4.2+.
 
 If you really like it and feel like [buying me a piece of cake](https://herbherth.itch.io/gdscript-quality-of-life-plugin) for my efforts, it would be greatly appreciated, thank you!
 
