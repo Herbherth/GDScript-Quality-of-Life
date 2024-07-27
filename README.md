@@ -7,10 +7,14 @@ This plugin should work for Godot 4.2+.
 If you really like it and feel like [buying me a piece of cake](https://herbherth.itch.io/gdscript-quality-of-life-plugin) for my efforts, it would be greatly appreciated, thank you!
 
 ## Installation:
-- Soon you will be able to install via [Godot Asset Store](https://godotengine.org/asset-library/asset).
+- Easiest way: install via [Godot Asset Store](https://godotengine.org/asset-library/asset/3179).
+
+OR:
+
 - Download and unzip the plugin at `res://`, in the end your project should have this path: `res://addons/ScriptEditorQoL`.
 - Make sure to enable the plugin at `Project -> Project Settings -> Plugins`
-- As simple as that, have fun with your new quality of life GDScript.
+
+As simple as that, have fun with your new quality of life GDScript.
 
 ## Tutorial:
 The line is updated as soon as you press `Enter` to change the line.
@@ -257,4 +261,10 @@ The keys must be from type [b]String[/b], or it will not be found.
 
 >Default value:  `"await f": "await get_tree().process_frame"`
 
-For now, it only accepts single line changes. To use multiline changes, I recommend give a look at [GDScriptMacros](https://github.com/rainlizard/GDScriptMacros)  -  Not mine, btw
+For now, it only accepts single line changes. To use multiline changes, I recommend give a look at [GDScriptMacros](https://github.com/rainlizard/GDScriptMacros).
+
+
+## Plugins you might like as well:
+- [Globalize Plugins](https://godotengine.org/asset-library/asset/2681)
+- [GDScript Macros](https://godotengine.org/asset-library/asset/992)
+- [Color Preview](https://godotengine.org/asset-library/asset/1252)
