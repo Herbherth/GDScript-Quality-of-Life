@@ -1,9 +1,9 @@
-# Did you know that this code documentation is done?
-# Press F1 and search for GDScriptQualityOfLife (or click on the class_name above and press alt + F1)
-# You can also click on global variables or method names and press alt + F1
 @tool
 class_name GDScriptQualityOfLife
 extends EditorPlugin
+# Did you know that this code documentation is done?
+# Press F1 and search for GDScriptQualityOfLife (or click on the class_name above and press alt + F1)
+# You can also click on global variables or method names and press alt + F1
 
 ## GDScript Quality of Life (or GDSQoL) brings to you more quality of life and
 ## speed while programming in Godot.[br][br]
@@ -1042,6 +1042,12 @@ func created_method(method_name: String,  param: String,  return_type: String, t
 	DisplayServer.clipboard_set(last_clipboard_text) # Return the previous clipboard content
 	
 	var last_line_index: int = current_code.get_line_count() - 1 # Get code bottom
+	var last_line_text: String = current_code.get_line(last_line_index)
+	if not last_line_text.dedent().is_empty(): # If the last line is not empty, make it empty
+		insert_line_at(last_line_index, last_line_text) # The created line is placed above last line, so we must replace both
+		last_line_index += 1
+		current_code.set_line.call_deferred(last_line_index, "")
+	
 	var method_line: String = "\nfunc %s(%s) -> %s:" % [method_name, param, return_type]
 	insert_line_at(last_line_index, method_line)
 	if text:
