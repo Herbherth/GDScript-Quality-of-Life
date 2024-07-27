@@ -196,8 +196,6 @@ You can navigate through the popup window just with `Tab` to change focused item
 
 The new created method will be placed at the very bottom of your code, and where the selected text was, it will be placed the method call.
 
-Usually, when you save a code, godot automatically makes sure there is one empty line at the bottom, but if for any reason there isn't, keep in mind that the last line can be messed up with the new method (normally it should not be a problem).
-
 ![](https://raw.githubusercontent.com/Herbherth/GDScript-Quality-of-Life/main/images/createmethod.gif)
 
 -----------------------------------------
