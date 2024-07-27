@@ -1,3 +1,5 @@
+# Recognize gdscript files
+*.gd linguist-language=GDScript
 # Normalize line endings for all files that Git considers text files.
 * text=auto eol=lf
 
