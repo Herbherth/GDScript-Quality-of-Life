@@ -233,8 +233,11 @@ func get_editor_code_edit(node: Node) -> void:
 		current_code = null
 	
 	# If the focused window is not a code editor for gdscript (ignore shader editor), return
-	if not node is CodeEdit or not node.get_parent().get_class() == "CodeTextEditor": return
+	if not node is CodeEdit or not node.get_parent().get_class() == "CodeTextEditor": 
+		updated_by_code = true # Ignore any code added while code editor not focused (like signals from Node tab)
+		return
 	
+	set_deferred("updated_by_code", false) # When editor is focused back, listen to it again
 	current_code = node # Get new editor
 	current_code.lines_edited_from.connect(self.changed_line)
 	
@@ -258,7 +261,7 @@ func changed_line(_from_line: int, _to_line: int) -> void:
 	
 	# If deleted line
 	if _to_line < _from_line and deleted_line_action_pressed():
-		remove_indent_on_delete(_to_line, _from_line)
+		remove_indent_on_delete.call_deferred(_to_line, _from_line)
 #endregion
 
 
@@ -1181,10 +1184,16 @@ func remove_indent_on_delete(_to_line: int, _from_line: int) -> void:
 	if not editor_setting.get_setting("gdscript_qol/auto_remove_indent_on_delete_line"):
 		return # it can be deactivated
 	last_line.set_line(_to_line, _from_line, current_code) # Set line info
+	
+	# If caret is before text, there will be indentation only until it, erasing everything after.
+	var caret_pos: int = current_code.get_caret_column()
+	if last_line.indent.count("\t") >= caret_pos:
+		last_line.indent = "\t".repeat(caret_pos)
+	
 	# last_line.text should not have \t (indentation) at beginning. 
 	# If it has any, it is in the middle of the line and should be removed.
 	var new_line = last_line.indent + last_line.text.replace("\t", "")
-	current_code.set_line.call_deferred(last_line.line, new_line)
+	current_code.set_line.call_deferred(last_line.line, new_line) 
 
 
 ## Calls [method TextEdit.insert_line_at] and signals the code that the new line
