@@ -153,7 +153,6 @@ var updated_by_code: bool = false ## If the code was changed by code and not by 
 func _enter_tree() -> void:
 	last_line = LastLineChanged.new()
 	set_editor_settings()
-	get_editor_code_edit() # Get script editor
 	# It looks like a different script calls a different CodeEdit, so we need to recall it every time you change the script 
 	EditorInterface.get_script_editor().editor_script_changed.connect(get_editor_code_edit)
 
@@ -234,7 +233,6 @@ func remove_editor_settings() -> void:
 ## needs to be passed as parameter.[br]
 ## [br]It also saves the current script that is being edited in [member current_script].
 func get_editor_code_edit(_script: Script = null) -> void:
-	if not EditorInterface.get_script_editor().get_current_editor(): return
 	if current_code: # If there is already a CodeEdit, disconnect the signals and get the new one
 		if current_code.lines_edited_from.is_connected(changed_line):
 			on_code_edit_exit()
