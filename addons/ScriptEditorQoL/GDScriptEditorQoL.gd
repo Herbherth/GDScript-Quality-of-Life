@@ -153,8 +153,9 @@ var updated_by_code: bool = false ## If the code was changed by code and not by 
 func _enter_tree() -> void:
 	last_line = LastLineChanged.new()
 	set_editor_settings()
-	get_editor_code_edit(get_viewport().gui_get_focus_owner()) # Get editor on focus right now
-	get_viewport().gui_focus_changed.connect(get_editor_code_edit) # Get editor when change focus
+	get_editor_code_edit() # Get script editor
+	# It looks like a different script calls a different CodeEdit, so we need to recall it every time you change the script 
+	EditorInterface.get_script_editor().editor_script_changed.connect(get_editor_code_edit)
 
 
 func _exit_tree() -> void:
@@ -224,25 +225,46 @@ func remove_editor_settings() -> void:
 	config.save(path) # Save it
 
 
-## It is connected to [signal Viewport.gui_focus_changed] to get the current focused window and
-## check if it is a GDScript code editor (ignores Shader code editor window) to save it in [member current_code].
+## It gets the [CodeEdit] returned by [method ScriptEditorBase.get_base_editor], saves it to
+## [member current_code], and connects [signal Control.focus_entered] and
+## [signal Control.focus_exited] to know when the user is editing the script.[br]
+## [br]It looks like each [Script] uses a different [CodeEdit], so it must be recalled every time
+## the user changes the script with [signal ScriptEditor.editor_script_changed]. This signal
+## returns a [Script] as parameter. We don't actually use it for nothing, but it
+## needs to be passed as parameter.[br]
 ## [br]It also saves the current script that is being edited in [member current_script].
-func get_editor_code_edit(node: Node) -> void:
-	if current_code: # Disconnect last editor
-		current_code.lines_edited_from.disconnect(self.changed_line)
-		current_code = null
-	
-	# If the focused window is not a code editor for gdscript (ignore shader editor), return
-	if not node is CodeEdit or not node.get_parent().get_class() == "CodeTextEditor": 
-		updated_by_code = true # Ignore any code added while code editor not focused (like signals from Node tab)
-		return
-	
+func get_editor_code_edit(_script: Script = null) -> void:
+	if current_code: # If there is already a CodeEdit, disconnect the signals and get the new one
+		if current_code.lines_edited_from.is_connected(changed_line):
+			on_code_edit_exit()
+		current_code.focus_entered.disconnect(on_code_edit_focus)
+		current_code.focus_exited.disconnect(on_code_edit_exit)
+	current_code = EditorInterface.get_script_editor().get_current_editor().get_base_editor()
+	current_code.focus_entered.connect(on_code_edit_focus)
+	current_code.focus_exited.connect(on_code_edit_exit)
+	on_code_edit_focus()
+
+
+## Called when user focus on code editor window.
+func on_code_edit_focus() -> void:
+	if current_script != null: return
 	set_deferred("updated_by_code", false) # When editor is focused back, listen to it again
-	current_code = node # Get new editor
 	current_code.lines_edited_from.connect(self.changed_line)
-	
-	# Get current script
-	current_script = EditorInterface.get_script_editor().get_current_script()
+	current_script = EditorInterface.get_script_editor().get_current_script() # Get current script
+
+
+## Called when user is not focused on code editor window.
+func on_code_edit_exit() -> void:
+	updated_by_code = true
+	if current_code.lines_edited_from.is_connected(changed_line):
+		current_code.lines_edited_from.disconnect(self.changed_line)
+	current_script = null
+
+
+func _notification(what):
+	# When the ScriptEditor is floating, loses the focus when focusing the main engine
+	if what == NOTIFICATION_WM_WINDOW_FOCUS_IN:
+		if current_script: on_code_edit_exit()
 
 
 ## Called when [member current_code] emit [signal TextEdit.lines_edited_from]
@@ -267,6 +289,7 @@ func changed_line(_from_line: int, _to_line: int) -> void:
 
 #region Checks
 func _shortcut_input(event: InputEvent) -> void:
+	if not current_script: return # If there is no current_script, no shortcut should be called
 	# Only proceed if event is just pressed (not holding) and it is in a valid current code.
 	if not event.is_pressed() or event.is_echo() or not current_code: return
 	if event.is_match(create_method_shortcut):
