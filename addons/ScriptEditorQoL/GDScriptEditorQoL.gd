@@ -234,6 +234,7 @@ func remove_editor_settings() -> void:
 ## needs to be passed as parameter.[br]
 ## [br]It also saves the current script that is being edited in [member current_script].
 func get_editor_code_edit(_script: Script = null) -> void:
+	if not EditorInterface.get_script_editor().get_current_editor(): return
 	if current_code: # If there is already a CodeEdit, disconnect the signals and get the new one
 		if current_code.lines_edited_from.is_connected(changed_line):
 			on_code_edit_exit()
