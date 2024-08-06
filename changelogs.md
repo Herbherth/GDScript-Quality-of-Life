@@ -1,3 +1,6 @@
+[1.0.4](https://github.com/Herbherth/GDScript-Quality-of-Life/tree/98970aefa3933bb42296ab38984c548d7b5b07de)
+  - Small update to fix error message on loading project
+
 [1.0.3](https://github.com/Herbherth/GDScript-Quality-of-Life/tree/324a65f80e79606961ffe7e5b5ccebea189c3fbc)
   - Now it works with floating editor script as well
 
