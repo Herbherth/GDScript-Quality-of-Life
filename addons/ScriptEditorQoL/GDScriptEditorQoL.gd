@@ -108,6 +108,26 @@ var create_method_shortcut: InputEventKey
 ## [br]Default value: [kbd]ctrl + U[/kbd][br]
 var update_line_shortcut: InputEventKey
 
+## [br]Shortcut to jump to beginning of current indent level
+## [br]The shortcut can be changed at [code]Editor -> Editor Settings -> GDScript QoL[/code]
+## [br]Default value: [kbd]ctrl + I[/kbd][br]
+var up_indent_level_shortcut: InputEventKey
+
+## [br]Shortcut to return to the stored position of the current script
+## [br]The shortcut can be changed at [code]Editor -> Editor Settings -> GDScript QoL[/code]
+## [br]Default value: [kbd]alt + L[/kbd][br]
+var return_to_stored_position_shortcut: InputEventKey
+
+## [br]Shortcut to store the current position of the current script
+## [br]The shortcut can be changed at [code]Editor -> Editor Settings -> GDScript QoL[/code]
+## [br]Default value: [kbd]alt + M[/kbd][br]
+var store_current_position_shortcut: InputEventKey
+
+## [br]Shortcut to move screen to caret.
+## [br]The shortcut can be changed at [code]Editor -> Editor Settings -> GDScript QoL[/code]
+## [br]Default value: [kbd]alt + C[/kbd][br]
+var return_to_caret_shortcut: InputEventKey
+
 ## Change the [member settings] at [code]Editor -> Editor Settings -> GDScript QoL[/code]
 ## [br][br][param Function Variable Name]: The name of the variable that will be auto created when creating a method with return type.
 ## [br]Default value: [code]private_var[/code]
@@ -123,6 +143,12 @@ var update_line_shortcut: InputEventKey
 ## [br]Default value: [kbd]ctrl + M[/kbd]
 ## [br][br][param Update Line Shortcut]: The shortcut to update the current line without pressing ENTER.
 ## [br]Default value: [kbd]ctrl + U[/kbd]
+## [br][br][param Up Indent Level Shortcut]: The shortcut to jump to the start of the current indent level.
+## [br]Default value: [kbd]ctrl + I[/kbd]
+## [br][br][param Return to Saved Position]: The shortcut to jump to the stored position for the current script.
+## [br]Default value: [kbd]alt + K[/kbd]
+## [br][br][param Store Current Position]: The shortcut to store the current position of the caret in the current script.
+## [br]Default value: [kbd]alt + M[/kbd]
 ## [br][br][param Change To]: A dictionary of [b]STRING[/b] keys that when they are found as a line text, will auto change to respective values as String.
 ## [br]Default value: [code] "await f": "await get_tree().process_frame"[/code]
 ## [br]For now, it only accepts single line changes. To use multiline changes,
@@ -135,6 +161,10 @@ var settings: Dictionary = {
 	"gdscript_qol/auto_remove_indent_on_delete_line": true,
 	"gdscript_qol/create_method_shortcut": input_create_method(),
 	"gdscript_qol/update_line_shortcut": input_update_line(),
+	"gdscript_qol/up_indent_level_shortcut": input_up_indent_level(),
+	"gdscript_qol/return_to_stored_position_shortcut": input_return_to_stored_position(),
+	"gdscript_qol/store_current_position_shortcut": input_store_current_position(),
+	"gdscript_qol/return_to_caret_shortcut": input_return_to_caret(),
 	"gdscript_qol/change_to": {"await f": "await get_tree().process_frame"},
 	}
 
@@ -146,6 +176,10 @@ var editor_setting: EditorSettings ## Used to access the settings at [code]Edito
 var last_line: LastLineChanged ## All the last line info are stored at a custom class [GDScriptQualityOfLife.LastLineChanged]
 var is_shortcut_pressed: bool = false ## If a shortcut is pressed, this bool is triggered until it finishes it's job, or else things might break with [method check_paste] logic.
 var updated_by_code: bool = false ## If the code was changed by code and not by user, this will return [code]true[/code] and avoid the code to continue running.
+
+## Stored line numbers for script files, used by indent and navigation shortcuts
+var stored_positions: Dictionary = {
+}
 #endregion
 
 
@@ -183,6 +217,42 @@ func input_update_line() -> InputEventKey:
 	return ul
 
 
+## Creates and return the default [InputEventKey] that will be used for [member up_indent_level_shortcut][br]
+## The default value is [kbd]Ctrl + I[/kbd] and can be changed at [code]Editor -> Editor Settings -> GDScript QoL[/code]
+func input_up_indent_level() -> InputEventKey:
+	var ul: InputEventKey = InputEventKey.new()
+	ul.keycode = KEY_I
+	ul.ctrl_pressed = true
+	return ul
+
+
+## Creates and return the default [InputEventKey] that will be used for [member return_to_stored_position_shortcut][br]
+## The default value is [kbd]Alt + K[/kbd] and can be changed at [code]Editor -> Editor Settings -> GDScript QoL[/code]
+func input_return_to_stored_position() -> InputEventKey:
+	var ul: InputEventKey = InputEventKey.new()
+	ul.keycode = KEY_K
+	ul.alt_pressed = true
+	return ul
+
+
+## Creates and return the default [InputEventKey] that will be used for [member store_current_position_shortcut][br]
+## The default value is [kbd]Alt + M[/kbd] and can be changed at [code]Editor -> Editor Settings -> GDScript QoL[/code]
+func input_store_current_position() -> InputEventKey:
+	var ul: InputEventKey = InputEventKey.new()
+	ul.keycode = KEY_M
+	ul.alt_pressed = true
+	return ul
+
+
+## Creates and return the default [InputEventKey] that will be used for [member return_to_caret_shortcut][br]
+## The default value is [kbd]Alt + C[/kbd] and can be changed at [code]Editor -> Editor Settings -> GDScript QoL[/code]
+func input_return_to_caret() -> InputEventKey:
+	var ul: InputEventKey = InputEventKey.new()
+	ul.keycode = KEY_C
+	ul.alt_pressed = true
+	return ul
+
+
 ## Set all keys and values from [member settings] to [code]Editor -> Editor Settings -> GDScript QoL[/code]
 ## [br]This is done once, on startup or addon activation.[br]
 ## This also sets all settings values to what is saved in the file [constant SAVE_FILE_NAME]
@@ -205,6 +275,10 @@ func set_editor_settings() -> void:
 	
 	create_method_shortcut = editor_setting.get_setting("gdscript_qol/create_method_shortcut")
 	update_line_shortcut = editor_setting.get_setting("gdscript_qol/update_line_shortcut")
+	up_indent_level_shortcut = editor_setting.get_setting("gdscript_qol/up_indent_level_shortcut")
+	return_to_stored_position_shortcut = editor_setting.get_setting("gdscript_qol/return_to_stored_position_shortcut")
+	store_current_position_shortcut = editor_setting.get_setting("gdscript_qol/store_current_position_shortcut")
+	return_to_caret_shortcut = editor_setting.get_setting("gdscript_qol/return_to_caret_shortcut")
 
 
 ## Remove all keys from [member settings] at [code]Editor -> Editor Settings -> GDScript QoL[/code]
@@ -297,6 +371,22 @@ func _shortcut_input(event: InputEvent) -> void:
 	
 	if event.is_match(update_line_shortcut):
 		shortcut_detected(update_line)
+		return
+	
+	if event.is_match(up_indent_level_shortcut):
+		shortcut_detected(up_indent_level)
+		return
+	
+	if event.is_match(return_to_stored_position_shortcut):
+		shortcut_detected(return_to_stored_position)
+		return
+	
+	if event.is_match(store_current_position_shortcut):
+		shortcut_detected(store_current_position)
+		return
+	
+	if event.is_match(return_to_caret_shortcut):
+		shortcut_detected(return_to_caret)
 		return
 
 
@@ -1093,6 +1183,40 @@ func update_line() -> void:
 	set_caret.call_deferred(current_line) # Keep caret at same line
 
 
+## Saves line number the caret is on in the current script
+func store_current_position() -> void:
+	if not stored_positions.has(current_script):
+		stored_positions[current_script] = []
+	
+	stored_positions[current_script].push_back(current_code.get_caret_line())
+
+
+## Moves caret to start of current indent level
+func up_indent_level() -> void:
+	var indent_start_line: int = get_indent_start()
+	
+	if indent_start_line != -1:
+		store_current_position()
+		set_caret.call_deferred(indent_start_line)
+
+
+## Pops newest position off stored_positions stack for current script(if exists) and moves caret
+## to that position
+func return_to_stored_position() -> void:
+	if not stored_positions.has(current_script):
+		return
+	
+	if stored_positions[current_script].is_empty():
+		return
+	
+	set_caret.call_deferred(stored_positions[current_script].pop_back())
+
+
+## Move screen back to current caret when you've scrolled away
+func return_to_caret() -> void:
+	set_caret.call_deferred(current_code.get_caret_line())
+
+
 ## Put an [code]:[/code] at the end of unfinished [code]if[/code] statements.[br]
 ## It will not work if there is a comment afte [code]if[/code] statement
 func finish_if_statement() -> bool:
@@ -1150,6 +1274,33 @@ func get_if_indent_level() -> int:
 		if clean_text.begins_with("func"): break # no IF found inside method, no need to keep searching
 		if clean_text.begins_with("if"): return indent_level
 	return current_indent # Nothing found, keep indentation
+
+
+## Get the line number where the current indent level started
+func get_indent_start() -> int:
+	var current_line = current_code.get_caret_line()
+	if current_line == 0: return -1
+	
+	var current_indent_level: int = current_code.get_line(current_line).count("\t")
+	
+	# already at lowest level, don't leave scope
+	if current_indent_level == 0:
+		return -1
+	
+	for i in range(current_line-1, 0, -1):
+		var indent_level: int = current_code.get_line(i).count("\t")
+		if current_indent_level == indent_level: continue # skips single line ifs
+		
+		var text: String = current_code.get_line(i)
+		var clean_text: String = text.strip_edges()
+		if clean_text.begins_with("func"): return i
+		if clean_text.begins_with("if"): return i
+		if clean_text.begins_with("elif"): return i
+		if clean_text.begins_with("else"): return i
+		if clean_text.begins_with("for"): return i
+		if clean_text.begins_with("while"): return i
+		if clean_text.begins_with("match"): return i
+	return -1 # Nothing found, keep indentation
 
 
 ## If special keyword set at [code]Editor -> Editor Settings -> GDScript QoL[/code]
